@@ -1,0 +1,386 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>OA系统</title>
+<link rel="stylesheet" type="text/css" href="easyui/1.3.4/themes/default/easyui.css" />
+<link rel="stylesheet" type="text/css" href="css/wu.css" />
+<link rel="stylesheet" type="text/css" href="css/icon.css" />
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="easyui/1.3.4/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="easyui/1.3.4/locale/easyui-lang-zh_CN.js"></script>
+<script src="js/echarts.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+</head>
+<body class="easyui-layout">
+	<!-- begin of header -->
+	<div class="wu-header" data-options="region:'north',border:false,split:true">
+    	<div class="wu-header-left">
+        	<h1>OA系统</h1>
+        </div>
+        <div class="wu-header-right">
+        	<p><strong class="easyui-tooltip" id="username"></strong>，欢迎您！</p>
+            <p><a href="javascript:update();">修改信息</a>|<a href="javascript:exit();">安全退出</a></p>
+        </div>
+    </div>
+    <!-- end of header -->
+    <!-- begin of sidebar -->
+	<div class="wu-sidebar" data-options="region:'west',split:true,border:true,title:'导航菜单'"> 
+		<div id="sampleDiv" class="easyui-accordion"  data-options="border:false,fit:true"  > 
+		</div>
+		
+    </div>	
+    <!-- end of sidebar -->    
+    <!-- begin of main -->
+    <div class="wu-main" data-options="region:'center'">
+        <div id="wu-tabs" class="easyui-tabs" data-options="border:false,fit:true">  
+             <div title="项目管理" data-options="href:'business/layout-1.html',closable:false,iconCls:'icon-tip',cls:'pd3'"></div>
+     
+        </div>
+        
+    </div>
+    <!-- end of main --> 
+    <!-- begin of footer -->
+	<div class="wu-footer" data-options="region:'south',border:true,split:true">
+    	&copy; 御财金融oa系统
+    </div>
+    <!-- end of footer -->  
+    
+    
+    <!-- Begin of easyui-dialog -->
+   <div  style="display: none"> 
+<div  id="wu-dialog2" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:300px;;width:400px; padding:10px;">
+	<form id="wu-form2" method="post">
+		<input type="hidden" name="id" >
+        <table>
+            <tr>
+                <td width="60" align="right">用户名:</td>
+                <td><input type="text" name="account" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">昵称:</td>
+                <td><input type="text" name="name" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">密码:</td>
+                <td><input type="password" name="password" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">确认密码:</td>
+                <td><input type="password" name="repassword" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">手机号码:</td>
+                <td><input type="text" name="phone" class="wu-text" /></td>
+            </tr>
+            <!--  
+             <tr>
+                <td align="right">性别:</td>
+                <td>
+              	    <input type="radio" name="sex" value="1" />男
+                    <input type="radio" name="sex" value="0" />女
+                </td>
+            </tr>-->
+          	 <tr style="display: none">
+                <td align="right">角色:</td>
+                <td><input id="roleSelect2" name="roleid">  </td>
+            </tr>
+             <tr style="visibility: hidden;">
+                <td align="right">状态</td>
+                <td>
+              	    <input type="radio" name="status" value="1" />启用
+                    <input type="radio" name="status" value="2" />冻结
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<input id="doTaskVal" type="hidden" >
+<input id="viewHistoryVal" type="hidden" >
+<input id="viewCurrentTaskVal" type="hidden" >
+<input id="viewAttachmentVal" type="hidden" >
+<input id="viewDocument" type="hidden" >
+</div>
+    <script type="text/javascript">
+  
+    var currentUser;
+    $.get("user/getuserinfo",function(data){
+		$("#username").text(data.name);
+		currentUser=data;
+	})
+	
+
+	$('#roleSelect2').combobox({    
+		  url:'role/list',    
+		    method: "GET",
+		    valueField:'id',    
+		    textField:'name'   
+		}); 
+    
+	function edit(){
+		if(maincheck()){
+			$('#wu-form2').form('submit', {
+				url:'user/update',
+				success:function(data){
+					$.messager.show({title:"提示信息",msg:"修改成功"});	
+					$('#wu-dialog2').dialog('close');
+					window.location='index.html';
+					
+					
+				}
+			});
+		}
+	}
+    
+    /**
+	检查字段
+	**/
+function maincheck(){
+	var account=$("#wu-form2 input[name='account']").val();
+	var name=$("#wu-form2 input[name='name']").val();
+	var phone=$("#wu-form2 input[name='phone']").val();
+	var sex=$("#wu-form2 [name='sex']").val();
+	var roleSelect=$('#roleSelect2').combobox('getValue');
+	var password=$("#wu-form2 input[name='password']").val();
+	var repassword=$("#wu-form2 input[name='repassword']").val();
+
+	
+	if(account==''){
+		$.messager.alert('信息提示','用户名不能为空','warning');
+		return false;
+	}
+	if(name==''){
+		$.messager.alert('信息提示','昵称不能为空！','warning');
+		return false;
+	}
+	
+	if(sex==''){
+		$.messager.alert('信息提示','性别不能为空！','warning');
+		return false;
+	}
+	if(password==''){
+		$.messager.alert('信息提示','密码不能为空！','warning');
+		return false;
+	}
+	if(repassword!=password){
+		$.messager.alert('信息提示','两次密码不一致！','warning');
+		return false;
+	}
+	if(password.length!=32){
+		$("#wu-form2 input[name='password']").val(hex_md5(password));
+	}
+	return true;
+}
+    
+	function update(){
+		$('#wu-form2').form('clear');
+		$("#wu-form2 input[name='id']").val(currentUser.id);
+		$("#wu-form2 input[name='account']").val(currentUser.account);
+		$("#wu-form2 input[name='account']").attr("disabled","disabled");
+		$("#wu-form2 input[name='name']").val(currentUser.name);
+		$("#wu-form2 input[name='phone']").val(currentUser.phone);
+		$("#wu-form2 input[name='password']").val(currentUser.password);
+		$("#wu-form2 input[name='repassword']").val(currentUser.password);
+		$("#wu-form2 [name='sex'][value='"+currentUser.sex+"']").prop("checked", "checked");
+		$('#roleSelect2').combobox('select',currentUser.roleid); 
+		$("#wu-form2 [name='status'][value='"+currentUser.status+"']").prop("checked", "checked");
+		$('#wu-dialog2').dialog({
+			closed: false,
+			modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: edit
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog2').dialog('close');                    
+                }
+            }]
+        });
+	}	
+		$(function(){
+			
+			$.ajax({
+		        dataType:'json',
+		        url : 'user/permission',
+		        async:false,
+		        type:"GET",
+		        success : function(data){
+		        	for(var i=0;i<data.length;i++){
+		        		var ochild=data[i].children;
+		        		if(ochild.length>0){
+		        			var str="<ul class='easyui-tree wu-side-tree'>"
+		        			for(var j=0;j<ochild.length;j++){
+		        				str+="<li iconCls='icon-chart-organisation' ><a href='javascript:void(0)'  data-icon='icon-chart-organisation' data-link='"+ochild[j].url+"' iframe='0'>"+ochild[j].text+"</a></li>";
+		        			}
+		        			str+="</ul>";
+		        		
+		        			$("#sampleDiv").accordion('add',{  
+			    		        title: data[i].text,  
+			    		        content: str
+			    		          
+			    		    });
+		        		}
+		        		
+		        		
+		        	}
+		        }
+		    });
+			
+			//当解析器完成解析动作的时候触发
+			$.parser.onComplete = function () {        
+	               $('.wu-side-tree a').bind("click",function(){  
+	                var title = $(this).text();  
+	                var url = $(this).attr('data-link');  
+	                var iconCls = $(this).attr('data-icon');  
+	                var iframe = $(this).attr('iframe')==1?true:false;  
+	                addTab(title,url,iconCls,iframe);  
+	            });   
+	          }  
+			
+			
+			
+		})
+		
+		function exit(){
+			$.post("user/logout",function(){
+				window.location='index.html';
+			})
+		}
+		
+		/**
+		* Name 选项卡初始化
+		*/
+		$('#wu-tabs').tabs({
+			tools:[{
+				iconCls:'icon-reload',
+				border:false,
+				handler:function(){
+					$('#wu-datagrid').datagrid('reload');
+				}
+			}]
+		});
+			
+		/**
+		* Name 添加菜单选项
+		* Param title 名称
+		* Param href 链接
+		* Param iconCls 图标样式
+		* Param iframe 链接跳转方式（true为iframe，false为href）
+		*/	
+		function addTab(title, href, iconCls, iframe){
+			var tabPanel = $('#wu-tabs');
+			if(!tabPanel.tabs('exists',title)){
+				var content = '<iframe scrolling="auto" frameborder="0"  src="'+ href +'" style="width:100%;height:100%;"></iframe>';
+				if(iframe){
+					tabPanel.tabs('add',{
+						title:title,
+						content:content,
+						iconCls:iconCls,
+						fit:true,
+						cls:'pd3',
+						closable:true
+					});
+				}
+				else{
+					tabPanel.tabs('add',{
+						title:title,
+						href:href,
+						iconCls:iconCls,
+						fit:true,
+						cls:'pd3',
+						closable:true
+					});
+				}
+			}
+			else
+			{
+				tabPanel.tabs('select',title);
+			}
+		}
+		/**
+		* Name 移除菜单选项
+		*/
+		function removeTab(){
+			var tabPanel = $('#wu-tabs');
+			var tab = tabPanel.tabs('getSelected');
+			if (tab){
+				var index = tabPanel.tabs('getTabIndex', tab);
+				tabPanel.tabs('close', index);
+			}
+		}
+		
+		
+		
+		function change(type){
+			var start=$("#start"+type).datebox('getValue');
+			var end=$("#end"+type).datebox('getValue');
+			
+			if(CompareDate2(start,end)){
+				$.messager.alert('警告','结束时间不能小于开始时间','warning');
+				return false;
+			}
+			else{
+				if(type==1){
+					loadData1(start,end);
+				}
+				else if(type==2){
+					loadData2(start,end);
+				}
+				else if(type==3){
+					loadData3(start,end);
+				}
+				
+			}
+			
+		}
+		
+		
+		 function pagerFilter(data) {  
+		        if (typeof data.length == 'number' && typeof data.splice == 'function') {   // is array  
+		            data = {  
+		                total: data.length,  
+		                rows: data  
+		            }  
+		        }  
+		        var dg = $(this);  
+		        var opts = dg.datagrid('options');  
+		        var pager = dg.datagrid('getPager');  
+		        pager.pagination({  
+		            onSelectPage: function (pageNum, pageSize) {  
+		                opts.pageNumber = pageNum;  
+		                opts.pageSize = pageSize;  
+		                pager.pagination('refresh', {  
+		                    pageNumber: pageNum,  
+		                    pageSize: pageSize  
+		                });  
+		                dg.datagrid('loadData', data);  
+		            }  
+		        });  
+		        if (!data.originalRows) {  
+		            data.originalRows = (data.rows);  
+		        }  
+		        var start = (opts.pageNumber - 1) * parseInt(opts.pageSize);  
+		        var end = start + parseInt(opts.pageSize);  
+		        data.rows = (data.originalRows.slice(start, end));  
+		        return data;  
+		    }  
+		
+		//比较日期大小
+		function CompareDate(d1,d2)
+		{
+		  return ((new Date(d1.replace(/-/g,"\/"))) >= (new Date(d2.replace(/-/g,"\/"))));
+		}
+		//比较日期大小
+		function CompareDate2(d1,d2)
+		{
+		  return ((new Date(d1.replace(/-/g,"\/"))) > (new Date(d2.replace(/-/g,"\/"))));
+		}
+		
+	</script>
+</body>
+</html>

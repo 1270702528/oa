@@ -1,0 +1,347 @@
+
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'center',border:false">
+    	<!-- Begin of toolbar -->
+        <div id="wu-toolbar">
+            <div class="wu-toolbar-button">
+                <a href="javascript:openAdd();" class="easyui-linkbutton" iconCls="icon-add"  plain="true">添加</a>
+                <a href="javascript:openEdit();" class="easyui-linkbutton" iconCls="icon-edit"  plain="true">修改</a>
+                <a href="javascript:remove();" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+            </div>
+            <!--
+            <div class="wu-toolbar-search">
+                <label>用户名：</label><input class="wu-text" style="width:100px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search">开始检索</a>
+            </div>-->
+        </div>
+        <!-- End of toolbar -->
+        <div style="height: 420px;">
+       	    <table id="wu-datagrid"></table>
+        </div>
+    </div>
+</div>
+<!-- Begin of easyui-dialog -->
+<div id="wu-dialog" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:300px;;width:400px; padding:10px;">
+	<form id="wu-form" method="post">
+		<input type="hidden" name="id" >
+        <table>
+            <tr>
+                <td width="60" align="right">用户名:</td>
+                <td><input type="text" name="account" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">姓名:</td>
+                <td><input type="text" name="name" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">密码:</td>
+                <td><input type="password" name="password" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">确认密码:</td>
+                <td><input type="password" name="repassword" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">手机号码:</td>
+                <td><input type="text" name="phone" class="wu-text" /></td>
+            </tr>
+            <!-- 
+             <tr>
+                <td align="right">性别:</td>
+                <td>
+              	    <input type="radio" name="sex" value="1" />男
+                    <input type="radio" name="sex" value="0" />女
+                </td>
+            </tr>
+             -->
+             <tr>
+                <td align="right">角色:</td>
+                <td><input id="roleSelect" name="roleid">  </td>
+            </tr>
+             <tr id="mystatus" style="visibility: hidden;">
+                <td align="right">状态</td>
+                <td>
+              	    <input type="radio" name="status" value="1" />启用
+                    <input type="radio" name="status" value="2" />冻结
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!-- End of easyui-dialog -->
+<script type="text/javascript">
+
+
+	/**
+		检查字段
+	**/
+	function usercheck(type){
+		
+		var account=$("#wu-form input[name='account']").val();
+		var name=$("#wu-form input[name='name']").val();
+		var phone=$("#wu-form input[name='phone']").val();
+		var sex=$("#wu-form [name='sex']").val();
+		var roleSelect=$('#roleSelect').combobox('getValues');
+		var password=$("#wu-form input[name='password']").val();
+		var repassword=$("#wu-form input[name='repassword']").val();
+		if(account==''){
+			$.messager.alert('信息提示','用户名不能为空','warning');
+			return false;
+		}
+		if(name==''){
+			$.messager.alert('信息提示','昵称不能为空！','warning');
+			return false;
+		}
+		if(roleSelect.length<=0){
+			$.messager.alert('信息提示','角色不能为空！','warning');
+			return false;
+		}
+		if(sex==''){
+			$.messager.alert('信息提示','性别不能为空！','warning');
+			return false;
+		}
+		if(password==''){
+			$.messager.alert('信息提示','密码不能为空！','warning');
+			return false;
+		}
+		if(repassword!=password){
+			$.messager.alert('信息提示','两次密码不一致！','warning');
+			return false;
+		}
+		
+		if(type!=1){
+			var isExist=false;
+			$.ajax({
+		        dataType:'json',
+		        url : 'user/checkUsername?username='+account,
+		        async:false,
+		        type:"GET",
+		        success : function(data){
+		        	if(data.data==1){
+						$.messager.alert('信息提示','用户名已存在！','warning');
+						isExist= true;
+					}
+		        }
+		    });
+			if(isExist){
+				return false;
+			}
+		}
+		if(password.length!=32){
+			$("#wu-form input[name='password']").val(hex_md5(password));
+		}
+		return true;
+	}
+	/**
+	* Name 添加记录
+	*/
+	function add(){
+	
+		if(usercheck()){
+			$('#wu-form').form('submit', {
+				url:'user/create?roles='+getRoleString(),
+				success:function(data){
+					$.messager.show({title:"提示信息",msg:"修改成功"});	
+					$('#wu-dialog').dialog('close');
+					$('#wu-datagrid').datagrid("reload");
+				}
+			});
+		}
+	}
+	
+	function getRoleString(){
+		var arr=$('#roleSelect').combobox('getValues');
+		var permission="";
+		for(var i=0;i<arr.length;i++){
+			if(arr[i]!=''){
+				permission+=arr[i]+",";
+			}
+		}
+		return permission;
+	}
+	/**
+	* Name 修改记录
+	*/
+	function edit(){
+		
+		
+		if(usercheck(1)){
+			$('#wu-form').form('submit', {
+				url:'user/update?roles='+getRoleString(),
+				success:function(data){
+					$.messager.show({title:"提示信息",msg:"修改成功"});	
+					$('#wu-dialog').dialog('close');
+					$('#wu-datagrid').datagrid("reload");	
+				}
+			});
+		}
+	}
+	
+	/**
+	* Name 删除记录
+	*/
+	function remove(){
+		$.messager.confirm('信息提示','确定要删除该记录？', function(result){
+			if(result){
+				var items = $('#wu-datagrid').datagrid('getSelections');
+			
+				
+				$.ajax({
+					url:'user/delete',
+					data:{"id":items[0].id},
+					type:"POST",
+					success:function(data){
+						
+						$.messager.show({title:"提示信息",msg:"删除成功"});		
+						$('#wu-datagrid').datagrid("reload");
+					}	
+				});
+			}	
+		});
+	}
+	
+	/**
+	* Name 打开添加窗口
+	*/
+	function openAdd(){
+		$("#wu-form input[name='account']").attr("disabled",false);
+		$('#roleSelect').combobox({    
+		    url:'role/list',    
+		    method: "GET",
+		    valueField:'id',    
+		    textField:'name' ,
+		    multiple:true,  
+		}); 
+		
+
+		$('#wu-form').form('clear');
+		$('#wu-dialog').dialog({
+			closed: false,
+			modal:true,
+            title: "添加信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: add
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog').dialog('close');                    
+                }
+            }]
+        });
+	}
+	
+	/**
+	* Name 打开修改窗口
+	*/
+	function openEdit(){
+		$('#roleSelect').combobox({    
+		    url:'role/list',    
+		    method: "GET",
+		    valueField:'id',    
+		    textField:'name' ,
+		    multiple:true,  
+		}); 
+		$('#wu-form').form('clear');
+		$("#mystatus").css('visibility','visible');
+		var item = $('#wu-datagrid').datagrid('getSelected');
+		$("#wu-form input[name='id']").val(item.id);
+		$("#wu-form input[name='account']").val(item.account);
+		$("#wu-form input[name='password']").val(item.password);
+		$("#wu-form input[name='repassword']").val(item.password);
+		$("#wu-form input[name='account']").attr("disabled","disabled");
+		$("#wu-form input[name='name']").val(item.name);
+		$("#wu-form input[name='phone']").val(item.phone);
+		$("#wu-form [name='sex'][value='"+item.sex+"']").prop("checked", "checked");
+		$('#roleSelect').combobox('setValues',item.roleid.split(",")); 
+		$("#wu-form [name='status'][value='"+item.status+"']").prop("checked", "checked");
+		$('#wu-dialog').dialog({
+			closed: false,
+			modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: edit
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog').dialog('close');                    
+                }
+            }]
+        });
+	}	
+	
+	/**
+	* Name 分页过滤器
+	*//*
+	function pagerFilter(data){            
+		if (typeof data.length == 'number' && typeof data.splice == 'function'){// is array                
+			data = {                   
+				total: data.length,                   
+				rows: data               
+			}            
+		}        
+		var dg = $(this);         
+		var opts = dg.datagrid('options');          
+		var pager = dg.datagrid('getPager');          
+		pager.pagination({                
+			onSelectPage:function(pageNum, pageSize){                 
+				opts.pageNumber = pageNum;                   
+				opts.pageSize = pageSize;                
+				pager.pagination('refresh',{pageNumber:pageNum,pageSize:pageSize});                  
+				dg.datagrid('loadData',data);                
+			}          
+		});           
+		if (!data.originalRows){               
+			data.originalRows = (data.rows);       
+		}         
+		var start = (opts.pageNumber-1)*parseInt(opts.pageSize);          
+		var end = start + parseInt(opts.pageSize);        
+		data.rows = (data.originalRows.slice(start, end));         
+		return data;       
+	}*/
+	
+	/**
+	* Name 载入数据
+	*/
+	$('#wu-datagrid').datagrid({
+		url:'user/list',	
+		method:'GET',	
+		//rownumbers:true,
+		//multiSort:true,
+		singleSelect:true,
+		//pageSize:20,           
+		pagination:false,
+		fitColumns:true,
+		fit:true,
+		columns:[[
+			{ checkbox:true},
+			{ field:'account',title:'用户名',width:100,sortable:true},
+			{ field:'name',title:'姓名',width:100},
+			/*{ field:'sex',title:'性别',width:100,
+				formatter:function(value){
+				 if(value==1){
+					 return '男';
+				 }else{
+					 return '女';
+				 }
+				}
+			},*/
+			{ field:'roleName',title:'角色',width:100},
+			{ field:'phone',title:'手机号码',width:100},
+			{ field:'status',title:'状态',width:100,
+				formatter:function(value){
+				 if(value==1){
+					 return '启用';
+				 }else{
+					 return '冻结';
+				 }
+				}}
+
+		]]
+	});
+</script>

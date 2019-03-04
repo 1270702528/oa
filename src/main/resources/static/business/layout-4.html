@@ -1,0 +1,221 @@
+<script src="js/aliyun-oss-sdk-4.4.4.min.js"></script>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'center',border:false">
+        <div id="attr-wu-toolbar">
+            <div class="wu-toolbar-button">
+             
+                <a href="javascript:openAttrAdd();" class="easyui-linkbutton" iconCls="icon-add"  plain="true">添加</a>
+                <a href="javascript:openAttrEdit();" class="easyui-linkbutton" iconCls="icon-edit"  plain="true">修改</a>
+         	 
+            </div>
+          
+        </div>
+
+        <div style="height: 420px;">
+       	    <table id="attr-wu-datagrid"></table>
+        </div>
+    </div>
+</div>
+
+<div id="attr-wu-dialog" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:300px;;width:400px; padding:10px;">
+	<form id="attr-wu-form" method="post">
+	
+	<label>附件类型:</label> <input id="fileType" class="easyui-combobox" name="fileType" style="width:300px;margin-top:30px; margin-left: 50px;" data-options="
+					url: 'filetype.json',
+					method: 'get',
+					valueField:'value',
+					textField:'text',
+					groupField:'group',
+					label: 'Browser:',
+					labelPosition: 'top'
+					">
+					
+				<br/>
+				<br/>
+				<br/>
+					
+					<input class="easyui-filebox" id="uploadFile" type="file" accept=".pdf,image/*" name="filename"style="width:300px;margin-left: 55px; " >
+					
+					
+					<div style="text-align: center;padding-top: 50px;">
+						<a  href="javascript:sumbit()" data-options="size:'large'" class="easyui-linkbutton" >上传</a>
+					</div>
+		
+       			<input type="hidden" id="updateId">
+    </form>
+</div>
+<script type="text/javascript">
+var id= $("#viewAttachmentVal").val();
+/*
+$.get("user/hasUploadPermission",function(data){
+		if(data.code==0){
+			var link=' <a href="javascript:openAttrAdd();" class="easyui-linkbutton" iconCls="icon-add"  plain="true">添加</a>';
+			link+='<a href="javascript:openAttrEdit();" class="easyui-linkbutton" iconCls="icon-edit"  plain="true">修改</a>';
+			$(".wu-toolbar-button").append(link);
+			$(".easyui-linkbutton").linkbutton();
+		}
+});*/
+
+var client = new OSS.Wrapper({
+	region : 'oss-cn-shenzhen',
+	accessKeyId : 'LTAIc8vGLDIpjWKh',
+	accessKeySecret : 'J9z7xgP5SbCIaLyrThCq0s5Na2Qf7a',
+	bucket : 'yucaijr1'
+	});
+
+
+
+
+function on_click_upload_file(order,name){
+
+	 var f = document.getElementById("uploadFile").files[0]; 
+	 var val= document.getElementById("uploadFile").value;
+	 var suffix = val.substr(val.indexOf("."));
+	 var obj=timestamp();  
+	 var storeAs = 'oa-file'+"/"+obj+suffix; 
+
+	  client.multipartUpload(storeAs, f).then(function (result) {
+			
+		 var updateId= $("#updateId").val();
+		  if(updateId>0){
+
+			  var data={"id":updateId,"imageUrl":result.url};
+			  $.post("attachment/update",data,function(data){
+				  if(data.code==0){
+		    		   $('#attr-wu-datagrid').datagrid('reload');
+		    		   $.messager.show({title:"提示信息",msg:"上传成功"});
+		    	   }
+			  })
+			  
+		  }else{
+
+			  var data={"projectInfoId":id,"imageUrl":result.url,"name":name,"orderNum":order}
+		       $.post("attachment/create",data,function(data){
+		    	   if(data.code==0){
+		    		   $('#attr-wu-datagrid').datagrid('reload');
+		    		   $.messager.show({title:"提示信息",msg:"上传成功"});
+		    	   }
+		    	   
+		       })
+		  }
+	       
+	        
+	  }).catch(function (err) {
+	      $.messager.alert("操作提示", "上传失败","error"); 
+		 
+	 });   
+	 }
+
+
+function timestamp(){  
+    var time = new Date();  
+    var y = time.getFullYear();  
+    var m = time.getMonth()+1;  
+    var d = time.getDate();  
+    var h = time.getHours();  
+    var mm = time.getMinutes();  
+    var s = time.getSeconds();  
+    return y+"/"+add0(m)+"/"+add0(d)+"/"+add0(h)+add0(mm)+add0(s);  
+}  
+	 
+function add0(m){  
+	return m<10?'0'+m : m;  
+} 
+	 
+	 
+function sumbit(){
+	var order=$("#fileType").combobox("getValue");
+  	var name=$("#fileType").combobox("getText");
+	
+  	if(isNaN(order)){
+  		order=-1;
+  	}
+  	if(order!='' && name!=''){
+  		on_click_upload_file(order,name);
+  	}else{
+  		$.messager.alert("操作提示", "请选择附件类型","error");  
+  	}
+	
+	
+}
+
+
+function openAttrEdit(){
+	
+	var item = $('#attr-wu-datagrid').datagrid('getSelected');
+	
+	$("#fileType").combobox('setValue',item.name); 
+	$("#updateId").val(item.id);
+	$('#attr-wu-dialog').dialog({
+		closed: false,
+		modal:true,
+        title: "文件上传",
+        buttons: [ {
+            text: '取消',
+            iconCls: 'icon-cancel',
+            handler: function () {
+                $('#attr-wu-dialog').dialog('close');                    
+            }
+        }]
+    });
+}
+
+
+function openAttrAdd(){
+	
+	$('#attr-wu-form').form('clear');
+	console.info($("#updateId").val());
+	$('#attr-wu-dialog').dialog({
+		closed: false,
+		modal:true,
+        title: "文件上传",
+        buttons: [ {
+            text: '取消',
+            iconCls: 'icon-cancel',
+            handler: function () {
+                $('#attr-wu-dialog').dialog('close');                    
+            }
+        }]
+    });
+}
+
+$('#attr-wu-datagrid').datagrid({ loadFilter: pagerFilter }).datagrid({
+	url:'attachment/list?id='+id,	
+	method:'GET',	
+	//rownumbers:true,
+	//multiSort:true,
+	singleSelect:true,
+           
+	pagination:true,
+	fitColumns:true,
+	fit:true,
+	columns:[[
+		{ checkbox:true},
+		{ field:'name',title:'附件名',width:100,
+			styler: function(value,row,index){
+			if (row.remark){
+				return 'background-color:#ffee00;color:red;';
+			}
+		}
+},
+		{ field:'userName',title:'上传者',width:50	},
+		{ field:'createTime',title:'上传时间',width:80},
+		{ field:'oper',title:'操作',width:100,
+			formatter:function(value,row,index){
+				var link;
+				if(row.imageUrl!=""){
+				    link='<a target="_blank" href="'+row.imageUrl+'">查看</a> &nbsp;&nbsp;&nbsp;';
+				}else{
+					link='未上传';
+				}
+				
+	
+				
+				return link;	
+			}}
+		
+	]]
+});
+
+
+</script>

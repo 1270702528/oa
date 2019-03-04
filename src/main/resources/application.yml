@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/oa
+    driver-class-name: com.mysql.jdbc.Driver
+    
+  thymeleaf:
+    prefix: classpath:/static
+    mode: LEGACYHTML5
+    
+  activiti:
+    check-process-definitions: false
+
+server:
+  port: 9000
+  servlet:
+    path: /oa/
+    
+    
+upload:
+  path: //home//logs//uploads/
+  path2:  D://code//java//workspace1//oa//src//main//resources//

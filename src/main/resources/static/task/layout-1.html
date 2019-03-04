@@ -1,0 +1,54 @@
+
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'center',border:false">
+    
+        <div style="height: 380px;">
+       	    <table id="task-wu-datagrid"></table>
+        </div>
+        
+      
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+	
+
+	
+
+	
+	$('#task-wu-datagrid').datagrid({
+		url:'process/list',	
+		method:'GET',	
+		singleSelect:true,        
+		//pagination:true,
+		//pageSize: 15,
+		fitColumns:true,
+		fit:true,
+		columns:[[
+			{ checkbox:true},
+			{ field:'title',title:'标题',width:100},
+			{ field:'taskName',title:'任务名称',width:100},
+			{ field:'createTime',title:'处理时间',width:100},
+			{ field:'oper',title:'操作',width:100,
+				formatter:function(value,row,index){
+					var link="";
+					
+					link+='<a href="javascript:dowork('+row.taskId+');">办理任务</a> &nbsp;&nbsp;&nbsp;';
+					link+='<a target="_blank" href="process/viewCurrentImage?taskId='+row.taskId+'">查看流程图</a>';
+					return link;	
+				}
+			}
+
+		]]
+	});
+	
+	function dowork(taskId){
+		 $("#doTaskVal").val(taskId);
+		 addTab("办理任务","task/layout-2.html","icon-chart-organisation",false);  
+	}
+	
+	
+
+</script>

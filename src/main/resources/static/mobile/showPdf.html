@@ -1,0 +1,40 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<title>文档</title>
+	<script src="../../../js/jquery.min.js"></script>
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<script type="text/javascript" src="../../../mobile/js/pdf.js"></script>
+	<script th:inline="javascript">
+
+		/*<![CDATA[*/
+		var url = [[${url}]];
+		/*]]>*/
+
+	$(function(){
+		pdfjsLib.workerSrc = '../../../mobile/js/pdf.worker.js';
+      
+		pdfjsLib.getDocument(url).then(function getPdf(pdf) {
+        	for (var i = 1; i <= pdf.numPages; i++) {
+        	 
+        	    pdf.getPage(i).then(function getPageHelloWorld(page) {
+        	      var scale = 1.5;
+        	      var viewport = page.getViewport(scale);
+
+        	      var canvas = document.createElement('canvas');
+        	      var context = canvas.getContext('2d');
+        	      canvas.height = viewport.height;
+        	      canvas.width = viewport.width;
+        	      document.body.appendChild(canvas);
+
+        	      page.render({canvasContext: context, viewport: viewport});
+        	    });
+        	  }
+     });
+});
+	</script>
+</head>
+<body>
+	
+
+	
+</body></html>

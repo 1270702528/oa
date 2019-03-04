@@ -1,0 +1,582 @@
+<script type="text/javascript">
+
+var id= $("#viewDocument").val();
+
+$('#doc-wu-datagrid').datagrid({
+	url:'project/docs?id='+id,	
+	method:'GET',	
+	singleSelect:true,        
+	pagination:true,
+	fitColumns:true,
+	fit:true,
+	columns:[[
+		{ checkbox:true},
+		{ field:'name',title:'文件名',width:100},
+		{ field:'status',title:'状态',width:100,
+			formatter:function(value){
+				if(value==1){
+					return "已生成";
+				}else{
+					return "未生成";
+				}
+			
+		}},
+		{ field:'oper',title:'操作',width:100,
+			formatter:function(value,row,index){
+			
+				var link="";
+				link+='<a target="_blank" href="project/download/'+id+'/'+index+'">下载</a> &nbsp;&nbsp;&nbsp;';
+				link+='<a href="javascript:viewField('+id+','+index+')">查看填写</a> &nbsp;&nbsp;&nbsp;';
+				return link;	
+			}
+		}
+
+	]]
+});
+
+function viewField(id,index){
+	
+	$.get("project/view/"+id+"/"+index,function(data){
+		console.info(data);
+		
+		$('#doc-wu-form'+index).form('clear');
+		for(var v in data){
+			var values=data[v];
+			if(values==null){
+				values="";
+			}
+			$("#doc-wu-form"+index+" input[name='"+v+"']").val(values);
+		}
+		if(data.status!=1){
+			$("#doc-wu-form"+index+" input").attr("disabled",true);
+		}
+		$('#doc-wu-dialog'+index).dialog({
+		    width: 400,            
+			height: 400,           
+			closed: false,
+			modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: function (){
+                	$('#doc-wu-form'+index).form('submit', {
+        				url:'project/update?id='+id,
+        				success:function(data){
+        					$.messager.show({title:"提示信息",msg:"修改成功"});	
+        					$('#doc-wu-dialog'+index).dialog('close');	
+        				}
+        			});
+            	}
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#doc-wu-dialog'+index).dialog('close');                    
+                }
+            }]
+        });
+	})
+	
+	
+}
+</script>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'center',border:false">
+   
+        <div style="height: 440px;">
+       	    <table id="doc-wu-datagrid" style="width:auto;height:400px;border:1px solid #ccc;">
+       	    	
+       	    </table>
+        </div>
+        
+      
+    </div>
+</div>
+<div id="doc-wu-dialog0" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:400px;;width:600px; padding:10px;">
+	<form id="doc-wu-form0" method="post">
+        <table>
+            <tr>
+                <td width="100" align="right">借款人名称:</td>
+                <td><input type="text" name="F34" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+           <tr>
+                <td width="100" align="right">借款金额:</td>
+                <td><input type="text" name="F21" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款期限:</td>
+                <td><input type="text" name="F22" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款年化利率:</td>
+                <td><input type="text" name="F23" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">业务种类:</td>
+                <td><input type="text" name="F35" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">主要担保方式:</td>
+                <td><input type="text" name="F45" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">还款方式:</td>
+                <td><input type="text" name="F25" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">项目来源:</td>
+                <td><input type="text" name="F36" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">尽调时间:</td>
+                <td><input type="text" name="F37" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">尽调人:</td>
+                <td><input type="text" name="F38" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款人基本情况:</td>
+                <td><input type="text" name="F42" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">经营情况:</td>
+                <td><input type="text" name="F43" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+ 			
+ 			
+ 			<tr>
+                <td width="100" align="right">资产负债状况:</td>
+                <td><input type="text" name="F20" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款用途调查:</td>
+                <td><input type="text" name="F27" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">还款来源调查:</td>
+                <td><input type="text" name="F28" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">担保措施:</td>
+                <td><input type="text" name="F41" class="wu-text" style="width: 250px;" /></td>
+            </tr>       <tr>
+                <td width="100" align="right">项目上线条件:</td>
+                <td><input type="text" name="F40" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">在其他网贷平台借款情况:</td>
+                <td><input type="text" name="F33" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">调查意见:</td>
+                <td><input type="text" name="F39" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">项目经理签名:</td>
+                <td><input type="text" name="F64" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>       <tr>
+                <td width="100" align="right">部门经理签名:</td>
+                <td><input type="text" name="F65" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">时间:</td>
+                <td><input type="text" name="F77" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+            
+        </table>
+    </form>
+</div>
+
+
+
+<div id="doc-wu-dialog1" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:400px;;width:600px; padding:10px;">
+	<form id="doc-wu-form1" method="post">
+        <table>
+            <tr>
+                <td width="100" align="right">借款人名称:</td>
+                <td><input type="text" name="F34" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+           <tr>
+                <td width="100" align="right">借款金额:</td>
+                <td><input type="text" name="F21" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款期限:</td>
+                <td><input type="text" name="F22" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+            <!-- 
+             <tr>
+                <td width="100" align="right">借款年化利率:</td>
+                <td><input type="text" name="F23" class="wu-text" style="width: 250px;" /></td>
+            </tr> -->
+             <tr>
+                <td width="100" align="right">年化收益利率:</td>
+                <td><input type="text" name="F23" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">联系人:</td>
+                <td><input type="text" name="F44" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">还款方式:</td>
+                <td><input type="text" name="F25" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">联系人电话:</td>
+                <td><input type="text" name="F10" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">申请时间:</td>
+                <td><input type="text" name="F86" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款人基本情况:</td>
+                <td><input type="text" name="F42" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">主要担保方式:</td>
+                <td><input type="text" name="F45" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款用途及还款来源:</td>
+                <td><input type="text" name="F87" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+ 			
+ 			
+ 			<tr>
+                <td width="100" align="right">结论:</td>
+                <td><input type="text" name="F46" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">项目经理签名:</td>
+                <td><input type="text" name="F64" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">市场部经理审批意见:</td>
+                <td><input type="text" name="F66" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             
+             
+             
+             
+            <tr>
+                <td width="100" align="right">借款用途:</td>
+                <td><input type="text" name="F27" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+            
+            <tr>
+                <td width="100" align="right">还款来源:</td>
+                <td><input type="text" name="F28" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">主要担保情况:</td>
+                <td><input type="text" name="F63" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+            
+            <tr>
+                <td width="100" align="right">网络借贷情况:</td>
+                <td><input type="text" name="F33" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">项目风险提示:</td>
+                <td><input type="text" name="F89" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+            
+            <tr>
+                <td width="100" align="right">风控措施:</td>
+                <td><input type="text" name="F90" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">审查结论:</td>
+                <td><input type="text" name="F91" class="wu-text"  style="width: 250px;" /></td>
+            </tr>
+            
+            <tr>
+                <td width="100" align="right">风控经办签名:</td>
+                <td><input type="text" name="F49" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+
+            <tr>
+                <td width="100" align="right">风控部经理审批意见:</td>
+                <td><input type="text" name="F68" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">运营部经理审批意见:</td>
+                <td><input type="text" name="F69" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+            
+            <tr>
+                <td width="100" align="right">总经理审批意见:</td>
+                <td><input type="text" name="F92" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+            
+        </table>
+    </form>
+</div>
+
+
+
+
+<div id="doc-wu-dialog2" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:400px;;width:600px; padding:10px;">
+	<form id="doc-wu-form2" method="post">
+        <table>
+            <tr>
+                <td width="100" align="right">审核事宜:</td>
+                <td><input type="text" name="F47" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+           <tr>
+                <td width="100" align="right">借款金额:</td>
+                <td><input type="text" name="F21" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款期限:</td>
+                <td><input type="text" name="F22" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+         
+             <tr>
+                <td width="100" align="right">年化收益利率:</td>
+                <td><input type="text" name="F23" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">还款方式:</td>
+                <td><input type="text" name="F25" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">标的类型:</td>
+                <td><input type="text" name="F35" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">项目主办人:</td>
+                <td><input type="text" name="F48" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">项目风控人员:</td>
+                <td><input type="text" name="F49" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">时间:</td>
+                <td><input type="text" name="F78" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">罚息:</td>
+                <td><input type="text" name="F50" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">保证合同内容:</td>
+                <td><input type="text" name="F51" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+ 			<tr>
+                <td width="100" align="right">签发人签字:</td>
+                <td><input type="text" name="F52" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>  
+        </table>
+    </form>
+</div>
+
+
+
+
+
+<div id="doc-wu-dialog3" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:400px;;width:600px; padding:10px;">
+	<form id="doc-wu-form3" method="post">
+        <table>
+            <tr>
+                <td width="100" align="right">借款协议编号:</td>
+                <td><input type="text" name="F53" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+           <tr>
+                <td width="100" align="right">借款人:</td>
+                <td><input type="text" name="F34" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">年化收益率:</td>
+                <td><input type="text" name="F23" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+         
+             <tr>
+                <td width="100" align="right">在借总金额:</td>
+                <td><input type="text" name="F54" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">本次申请金额:</td>
+                <td><input type="text" name="F21" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款期限:</td>
+                <td><input type="text" name="F22" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">成交服务费率:</td>
+                <td><input type="text" name="F24" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">筹款期限:</td>
+                <td><input type="text" name="F55" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">逾期罚息费率:</td>
+                <td><input type="text" name="F50" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">上线时间:</td>
+                <td><input type="text" name="F79" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">还款方式:</td>
+                <td><input type="text" name="F25" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+ 			<tr>
+                <td width="100" align="right">申请时间:</td>
+                <td><input type="text" name="F86" class="wu-text" style="width: 250px;" /></td>
+            </tr>  
+             <tr>
+                <td width="100" align="right">上传资料:</td>
+                <td><input type="text" name="F56" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+           <tr>
+                <td width="100" align="right">企业名称:</td>
+                <td><input type="text" name="F01" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">注册时间:</td>
+                <td><input type="text" name="F57" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+         
+             <tr>
+                <td width="100" align="right">法定代表人:</td>
+                <td><input type="text" name="F09" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">注册资本:</td>
+                <td><input type="text" name="F03" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">收入情况:</td>
+                <td><input type="text" name="F58" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">企业行业:</td>
+                <td><input type="text" name="F59" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">负债情况:</td>
+                <td><input type="text" name="F88" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">经营地址:</td>
+                <td><input type="text" name="F07" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">企业类型:</td>
+                <td><input type="text" name="F08" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">企业规模:</td>
+                <td><input type="text" name="F60" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+ 			<tr>
+                <td width="100" align="right">项目描述:</td>
+                <td><input type="text" name="description" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+            
+            
+            
+             <tr>
+                <td width="100" align="right">第一还款来源:</td>
+                <td><input type="text" name="F61" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">还款保障措施:</td>
+                <td><input type="text" name="F62" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">主要担保情况:</td>
+                <td><input type="text" name="F63" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">风控部经理意见:</td>
+                <td><input type="text" name="F68" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="110" align="right">运营部经理意见:</td>
+                <td><input type="text" name="F69" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="110" align="right">运营部经办人签名:</td>
+                <td><input type="text" name="F73" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="110" align="right">风控部经理签名:</td>
+                <td><input type="text" name="F70" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="110" align="right">运营部经理签名:</td>
+                <td><input type="text" name="F71" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+ 			
+        </table>
+    </form>
+</div>
+
+
+
+
+
+<div id="doc-wu-dialog4" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:400px;;width:600px; padding:10px;">
+	<form id="doc-wu-form4" method="post">
+        <table>
+            <tr>
+                <td width="100" align="right">借款人:</td>
+                <td><input type="text" name="F34" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+           <tr>
+                <td width="100" align="right">借款协议编号:</td>
+                <td><input type="text" name="F53" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">借款金额:</td>
+                <td><input type="text" name="F21" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+         
+             <tr>
+                <td width="100" align="right">借款期限:</td>
+                <td><input type="text" name="F22" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+            <!-- 
+             <tr>
+                <td width="100" align="right">本次放款金额:</td>
+                <td><input type="text" name="F21" class="wu-text" style="width: 250px;" /></td>
+            </tr> -->
+             <tr>
+                <td width="100" align="right">还款方式:</td>
+                <td><input type="text" name="F25" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">成交服务费率:</td>
+                <td><input type="text" name="F24" class="wu-text" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">运营部经理放款意见:</td>
+                <td><input type="text" name="F74" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">运营部经理签名:</td>
+                <td><input type="text" name="F71" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">财务部经办人意见:</td>
+                <td><input type="text" name="F75" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+             <tr>
+                <td width="100" align="right">财务部经办人签名:</td>
+                <td><input type="text" name="F76" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>
+ 			<tr>
+                <td width="100" align="right">时间:</td>
+                <td><input type="text" name="F80" class="wu-text" disabled="disabled" style="width: 250px;" /></td>
+            </tr>  
+        </table>
+    </form>
+</div>

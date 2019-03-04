@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<title>御财金融oa系统</title>
+	<link rel="stylesheet" type="text/css" href="css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="css/mobile.css">
+	<link rel="stylesheet" type="text/css" href="css/icon.css">
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="js/jquery.easyui.mobile.js"></script>
+	<script type="text/javascript" src="../js/md5.js"></script>
+</head>
+<script type="text/javascript">
+function login(){
+	var username=$("input[name='username']").val();
+	var password=$("input[name='password']").val();
+	password=hex_md5(password);
+	if(username.length>0 && password.length>0){
+		$.post("../user/login",{"username":username,"password":password},function(data){
+			console.info();
+			if(data.code==0){
+				window.location='main.html';
+			}else{
+				$.messager.alert("操作提示", "用户名密码错误！","error");  
+			}
+		})
+	}
+	
+}
+</script>
+<body>
+<div class="easyui-navpanel">
+		<header>
+			<div class="m-toolbar">
+				<span class="m-title">Login to System</span>
+			</div>
+		</header>
+		<div style="margin:20px auto;width:100px;height:100px;border-radius:100px;overflow:hidden">
+			<img src="../images/login1.jpg" style="margin:0;width:100%;height:100%;">
+		</div>
+		<div style="padding:0 20px">
+			<div style="margin-bottom:10px">
+				<input name='username' class="easyui-textbox" data-options="prompt:'username',iconCls:'icon-man'" style="width:100%;height:38px">
+			</div>
+			<div>
+				<input name='password' class="easyui-passwordbox" data-options="prompt:'password'" style="width:100%;height:38px">
+			</div>
+			<div style="text-align:center;margin-top:30px">
+				<a href="javascript:login()" class="easyui-linkbutton" style="width:100%;height:40px"><span style="font-size:16px">Login</span></a>
+			</div>
+			
+		</div>
+	</div>
+</body>
+</html>

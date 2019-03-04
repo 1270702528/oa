@@ -1,0 +1,237 @@
+
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'center',border:false">
+    	<!-- Begin of toolbar -->
+        <div id="role-wu-toolbar">
+            <div class="wu-toolbar-button">
+                <a href="javascript:roleopenAdd();" class="easyui-linkbutton" iconCls="icon-add"  plain="true">添加</a>
+                <a href="javascript:roleopenEdit();" class="easyui-linkbutton" iconCls="icon-edit"  plain="true">修改</a>
+            </div>
+            <!--  
+            <div class="wu-toolbar-search">
+                <label>用户名：</label><input class="wu-text" style="width:100px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search">开始检索</a>
+            </div>
+            -->
+        </div>
+        <!-- End of toolbar -->
+        <div style="height: 420px;">
+       	    <table id="role-wu-datagrid"></table>
+        </div>
+        
+        <div id="dd" class="easyui-dialog" title="权限配置" style="width:400px;height:300px;"   
+		        data-options="closed:true,iconCls:'icon-save',modal:true">   
+		   <ul id="tt"></ul>     
+		</div>  
+    </div>
+</div>
+<!-- Begin of easyui-dialog -->
+<div id="role-wu-dialog" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="height:150px;;width:400px; padding:10px;">
+	<form id="role-wu-form" method="post">
+		<input type="hidden" name="id" >
+        <table>
+            <tr>
+                <td width="60" align="right">名称:</td>
+                <td><input type="text" name="name" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">描述:</td>
+                <td><input type="text" name="message" class="wu-text" /></td>
+            </tr>
+ 
+             
+        </table>
+    </form>
+</div>
+<!-- End of easyui-dialog -->
+<script type="text/javascript">
+
+	
+
+	/**
+		检查字段
+	**/
+	function check(type){
+		
+		var name=$("#role-wu-form input[name='name']").val();
+		
+		var message=$("#role-wu-form input[name='message']").val();
+
+		if(name==''){
+			$.messager.alert('信息提示','名称不能为空！','warning');
+			return false;
+		}
+		
+		if(message==''){
+			$.messager.alert('信息提示','描述不能为空！','warning');
+			return false;
+		}
+
+		if(type!=1){
+			var isExist=false;
+			$.ajax({
+		        dataType:'json',
+		        url : 'role/checkName?name='+name,
+		        async:false,
+		        type:"GET",
+		        success : function(data){
+		        	if(data.data==1){
+						$.messager.alert('信息提示','角色名已存在！','warning');
+						isExist= true;
+					}
+		        }
+		    });
+			if(isExist){
+				return false;
+			}
+		}
+		
+		
+		return true;
+	}
+	/**
+	* Name 添加记录
+	*/
+	function roleadd(){
+		if(check()){
+			$('#role-wu-form').form('submit', {
+				url:'role/create',
+				success:function(data){
+					$.messager.show({title:"提示信息",msg:"添加成功"});	
+					$('#role-wu-dialog').dialog('close');
+					$('#role-wu-datagrid').datagrid("reload");
+				}
+			});
+		}
+	}
+	
+	/**
+	* Name 修改记录
+	*/
+	function roleedit(){
+		if(check(1)){
+			$('#role-wu-form').form('submit', {
+				url:'role/update',
+				success:function(data){
+					$.messager.show({title:"提示信息",msg:"修改成功"});	
+					$('#role-wu-dialog').dialog('close');
+					$('#role-wu-datagrid').datagrid("reload");	
+				}
+			});
+		}
+	}
+	
+	
+	
+	/**
+	* Name 打开添加窗口
+	*/
+	function roleopenAdd(){
+		$('#role-wu-form').form('clear');
+		$('#role-wu-dialog').dialog({
+			closed: false,
+			modal:true,
+            title: "添加信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: roleadd
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#role-wu-dialog').dialog('close');                    
+                }
+            }]
+        });
+	}
+	
+	/**
+	* Name 打开修改窗口
+	*/
+	function roleopenEdit(){
+		$('#role-wu-form').form('clear');
+	
+		var item = $('#role-wu-datagrid').datagrid('getSelected');
+		console.info(item);
+		$("#role-wu-form input[name='id']").val(item.id);
+		$("#role-wu-form input[name='name']").val(item.name);
+		$("#role-wu-form input[name='message']").val(item.message);
+		$('#role-wu-dialog').dialog({
+			closed: false,
+			modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: roleedit
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#role-wu-dialog').dialog('close');                    
+                }
+            }]
+        });
+	}	
+	function permissionAdd(){
+		var nodes = $('#tt').tree('getChecked');
+		var permissions="";
+		for(var i=0;i<nodes.length;i++){
+			permissions+=nodes[i].id+",";
+		}
+		$('#dd').dialog('close');
+		$.post("role/permission/update",{"permissions":permissions,"id":roleId},function(){
+			$.messager.show({title:"提示信息",msg:"修改成功"});	
+		})
+		
+	}
+	var roleId;
+	function openConf(value){
+		roleId=value;
+		$('#tt').tree({    
+		    url:'role/permission?id='+value,
+		    method:'GET',
+		    checkbox:true
+		     
+		});  
+		  $('#dd').dialog({
+				closed: false,
+				modal:true,
+	            buttons: [{
+	                text: '确定',
+	                iconCls: 'icon-ok',
+	                handler: permissionAdd 
+	            }, {
+	                text: '取消',
+	                iconCls: 'icon-cancel',
+	                handler: function () {
+	                    $('#dd').dialog('close');                    
+	                }
+	            }]
+	        });
+		  
+		  
+		  $('#dd').dialog('open');         
+	}
+	
+	$('#role-wu-datagrid').datagrid({
+		url:'role/list',	
+		method:'GET',	
+		singleSelect:true,        
+		pagination:false,
+		fitColumns:true,
+		fit:true,
+		columns:[[
+			{ checkbox:true},
+			{ field:'name',title:'名称',width:100},
+			{ field:'message',title:'描述',width:100},
+			{ field:'oper',title:'权限配置',width:100,
+				formatter:function(value,row,index){
+					return '<button onclick="openConf('+row.id+')">配置</button>';	
+				}
+			}
+
+		]]
+	});
+</script>
