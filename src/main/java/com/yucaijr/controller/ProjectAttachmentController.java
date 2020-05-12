@@ -46,4 +46,11 @@ public class ProjectAttachmentController{
 		sysLogService.insert(new SysLog(SessionTool.getLoginAccout(request), "修改附件信息"));
 		return ResultVOUtil.success();
 	}
+	@RequestMapping(value="/update2",method=RequestMethod.POST)
+	public ResultVO update2(@ModelAttribute ProjectAttachment projectAttachment,HttpServletRequest request){
+		projectAttachment.setUserName(SessionTool.getLoginAccout(request));
+		projectAttachmentService.update(projectAttachment);
+		sysLogService.insert(new SysLog(SessionTool.getLoginAccout(request), "修改附件信息"));
+		return ResultVOUtil.success();
+	}
 }

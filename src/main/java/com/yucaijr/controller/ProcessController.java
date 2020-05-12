@@ -146,5 +146,10 @@ public class ProcessController {
 		model.addAttribute("url",projectAttachmentService.getProjectAttachmentsById(id).getImageUrl());
 		return "/mobile/showPdf.html";
 	}
+	@RequestMapping(value="/mobile2/viewPdf/{id}",method=RequestMethod.GET)
+	public String MoblieViewPdf2(@PathVariable(value="id")Integer id,Model model,HttpServletResponse respone){
+		model.addAttribute("url",projectAttachmentService.getProjectAttachmentsById(id).getImageUrl());
+		return "/mobile/showPdf2.html";
+	}
 			
 }
