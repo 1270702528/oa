@@ -145,4 +145,12 @@ public class SysUserController {
 //		return ResultVOUtil.error(1001, "没有权限");
 //	}
 	
+	@RequestMapping(value="/checkUsername2",method=RequestMethod.GET)
+	public ResultVO checkUsername2(@RequestParam(value="username", defaultValue="")String username) {
+		SysUser sysUser=sysUserService.getByUsername(username);
+		if(sysUser!=null) {
+			return ResultVOUtil.success("1");
+		}
+		return ResultVOUtil.success("0");
+	}
 }

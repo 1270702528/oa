@@ -82,4 +82,10 @@ public class SysRoleController {
 		sysRoleService.updatePermission(id, permissions);
 		return ResultVOUtil.success();
 	}
+	@RequestMapping(value="/permission/update2",method=RequestMethod.POST)
+	public ResultVO permissionUpdate2(@RequestParam(value="id", defaultValue="") Integer id,
+			@RequestParam(value="permissions", defaultValue="") String permissions) {
+		sysRoleService.updatePermission(id, permissions);
+		return ResultVOUtil.success();
+	}
 }
